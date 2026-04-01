@@ -14,7 +14,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_FILE = path.join(__dirname, '../src/data/platforms.js');
 
-// 各平台配置
+// 各平台配置 - 更精确的 URL
 const PLATFORMS = [
   {
     id: 'aliyun',
@@ -25,8 +25,14 @@ const PLATFORMS = [
   {
     id: 'tencentcloud', 
     name: '腾讯云',
-    urls: ['https://cloud.tencent.com/'],
+    urls: ['https://cloud.tencent.com/act/pro/codingplan'],
     scraper: scrapeTencent
+  },
+  {
+    id: 'baidu',
+    name: '百度千帆',
+    urls: ['https://cloud.baidu.com/product/codingplan.html'],
+    scraper: scrapeBaidu
   },
   {
     id: 'minimax',
@@ -54,77 +60,256 @@ const PLATFORMS = [
   }
 ];
 
+// 模拟浏览器请求头
+const FETCH_OPTIONS = {
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1'
+  }
+};
+
 async function fetchPage(url) {
   try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8'
-      }
-    });
+    const response = await fetch(url, FETCH_OPTIONS);
     const text = await response.text();
-    return new JSDOM(text);
+    return new JSDOM(text, { runScripts: 'dangerously' });
   } catch (error) {
     console.error(`❌ 获取页面失败 ${url}:`, error.message);
     return null;
   }
 }
 
-// 各平台爬取逻辑
+// 阿里云百炼
 async function scrapeAliyun(platform) {
-  const results = { startPrice: 40, firstMonth: '¥7.9', plans: [] };
-  for (const url of platform.urls) {
-    const dom = await fetchPage(url);
-    if (!dom) continue;
+  const results = { startPrice: 40, firstMonth: '¥0.8', plans: [] };
+  try {
+    const dom = await fetchPage(platform.urls[0]);
+    if (!dom) return results;
     const text = dom.window.document.body.textContent;
-    // 匹配首月价格
-    const firstMatch = text.match(/首月.*?(\d+\.?\d*)\s*元/);
-    if (firstMatch) results.firstMonth = `¥${firstMatch[1]}`;
+    
+    // 匹配首月价格 - 多种模式
+    const firstPatterns = [
+      /首月[¥￥]?\s*(\d+\.?\d*)/,
+      /首月特惠[¥￥]?\s*(\d+\.?\d*)/,
+      /首月.*?(\d+\.?\d*)\s*元/
+    ];
+    for (const pattern of firstPatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        results.firstMonth = `¥${match[1]}`;
+        break;
+      }
+    }
+    
     // 匹配月付价格
-    const priceMatch = text.match(/(\d+)\s*元(?:\/月|每月)/);
-    if (priceMatch) results.startPrice = parseInt(priceMatch[1]);
+    const pricePatterns = [
+      /(\d+)\s*元\/月/,
+      /月付[¥￥]?\s*(\d+)/,
+      /(\d+)\s*元(?:\/月|每月)/
+    ];
+    for (const pattern of pricePatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        results.startPrice = parseInt(match[1]);
+        break;
+      }
+    }
+  } catch (e) {
+    console.error(`  ⚠️ 阿里云解析失败: ${e.message}`);
   }
   return results;
 }
 
+// 腾讯云 Coding Plan
 async function scrapeTencent(platform) {
   const results = { startPrice: 40, firstMonth: '¥7.9', plans: [] };
-  // 腾讯云逻辑
+  try {
+    const dom = await fetchPage(platform.urls[0]);
+    if (!dom) return results;
+    const text = dom.window.document.body.textContent;
+    
+    // 匹配首月价格
+    const firstPatterns = [
+      /首月[¥￥]?\s*(\d+\.?\d*)/,
+      /首月特惠[¥￥]?\s*(\d+\.?\d*)/,
+      /¥\s*(\d+\.?\d*)\s*起/
+    ];
+    for (const pattern of firstPatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        results.firstMonth = `¥${match[1]}`;
+        break;
+      }
+    }
+    
+    // 匹配价格
+    const pricePatterns = [
+      /(\d+)\s*元\/月/,
+      /Lite.*?(\d+)\s*元/,
+      /(\d+)\s*元起/
+    ];
+    for (const pattern of pricePatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        results.startPrice = parseInt(match[1]);
+        break;
+      }
+    }
+  } catch (e) {
+    console.error(`  ⚠️ 腾讯云解析失败: ${e.message}`);
+  }
   return results;
 }
 
+// 百度千帆
+async function scrapeBaidu(platform) {
+  const results = { startPrice: 49, firstMonth: null, plans: [] };
+  try {
+    const dom = await fetchPage(platform.urls[0]);
+    if (!dom) return results;
+    const text = dom.window.document.body.textContent;
+    
+    // 匹配价格
+    const pricePatterns = [
+      /(\d+)\s*元\/月/,
+      /(\d+)\s*元起/,
+      /Lite.*?(\d+)/,
+      /(\d+)\s*元/
+    ];
+    for (const pattern of pricePatterns) {
+      const match = text.match(pattern);
+      if (match && parseInt(match[1]) > 0) {
+        results.startPrice = parseInt(match[1]);
+        break;
+      }
+    }
+  } catch (e) {
+    console.error(`  ⚠️ 百度解析失败: ${e.message}`);
+  }
+  return results;
+}
+
+// MiniMax
 async function scrapeMiniMax(platform) {
   const results = { startPrice: 29, firstMonth: null, plans: [] };
-  for (const url of platform.urls) {
-    const dom = await fetchPage(url);
-    if (!dom) continue;
+  try {
+    const dom = await fetchPage(platform.urls[0]);
+    if (!dom) return results;
     const text = dom.window.document.body.textContent;
-    const match = text.match(/¥?\s*(\d+)\s*(?:元|\/月)/);
-    if (match) results.startPrice = parseInt(match[1]);
+    
+    // 匹配 Starter 价格
+    const starterPatterns = [
+      /Starter[^\d]*(\d+)\s*元/,
+      /¥\s*(\d+)\s*(?:元|\/月).*?Starter/
+    ];
+    for (const pattern of starterPatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        results.startPrice = parseInt(match[1]);
+        break;
+      }
+    }
+  } catch (e) {
+    console.error(`  ⚠️ MiniMax 解析失败: ${e.message}`);
   }
   return results;
 }
 
+// 智谱 GLM
 async function scrapeZhipu(platform) {
   const results = { startPrice: 49, firstMonth: null, plans: [] };
-  for (const url of platform.urls) {
-    const dom = await fetchPage(url);
-    if (!dom) continue;
+  try {
+    const dom = await fetchPage(platform.urls[0]);
+    if (!dom) return results;
     const text = dom.window.document.body.textContent;
-    const match = text.match(/¥?\s*(\d+)\s*(?:元|\/月)/);
-    if (match) results.startPrice = parseInt(match[1]);
+    
+    // 匹配 Lite 价格
+    const litePatterns = [
+      /Lite[^\d]*(\d+)\s*元/,
+      /GLM.*?Lite.*?(\d+)/,
+      /¥\s*(\d+).*?Lite/
+    ];
+    for (const pattern of litePatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        results.startPrice = parseInt(match[1]);
+        break;
+      }
+    }
+  } catch (e) {
+    console.error(`  ⚠️ 智谱解析失败: ${e.message}`);
   }
   return results;
 }
 
+// Kimi
 async function scrapeKimi(platform) {
   const results = { startPrice: 49, firstMonth: null, plans: [] };
+  try {
+    const dom = await fetchPage(platform.urls[0]);
+    if (!dom) return results;
+    const text = dom.window.document.body.textContent;
+    
+    // 匹配价格 - Kimi 有 Andante(49元) 和 Moderato(99元)
+    const pricePatterns = [
+      /Andante.*?(\d+)\s*元/,
+      /(\d+)\s*元.*?Andante/,
+      /K2\.5.*?(\d+)\s*元/
+    ];
+    for (const pattern of pricePatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        results.startPrice = parseInt(match[1]);
+        break;
+      }
+    }
+  } catch (e) {
+    console.error(`  ⚠️ Kimi 解析失败: ${e.message}`);
+  }
   return results;
 }
 
+// 火山引擎方舟
 async function scrapeVolcengine(platform) {
   const results = { startPrice: 40, firstMonth: '¥8.91', plans: [] };
+  try {
+    const dom = await fetchPage(platform.urls[0]);
+    if (!dom) return results;
+    const text = dom.window.document.body.textContent;
+    
+    // 匹配首月价格
+    const firstPatterns = [
+      /首月[¥￥]?\s*(\d+\.?\d*)/,
+      /首月.*?(\d+\.?\d*)\s*元/,
+      /¥\s*(\d+\.?\d*)\s*首月/
+    ];
+    for (const pattern of firstPatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        results.firstMonth = `¥${match[1]}`;
+        break;
+      }
+    }
+    
+    // 匹配月付价格
+    const pricePatterns = [
+      /(\d+)\s*元\/月/,
+      /Lite.*?(\d+)\s*元/
+    ];
+    for (const pattern of pricePatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        results.startPrice = parseInt(match[1]);
+        break;
+      }
+    }
+  } catch (e) {
+    console.error(`  ⚠️ 火山引擎解析失败: ${e.message}`);
+  }
   return results;
 }
 
