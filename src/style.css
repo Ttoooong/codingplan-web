@@ -466,3 +466,52 @@ footer a {
 .dark .table-wrapper {
   background: var(--bg);
 }
+
+/* 黑夜模式全面修复 */
+.dark body {
+  background: var(--bg) !important;
+}
+
+.dark .container {
+  background: var(--bg);
+}
+
+.dark .hero {
+  background: linear-gradient(180deg, var(--bg-alt) 0%, var(--bg) 100%) !important;
+}
+
+.dark .platforms {
+  background: var(--bg);
+}
+
+.dark .platform-card {
+  background: var(--card-bg) !important;
+  border-color: var(--border) !important;
+}
+
+.dark .plan {
+  background: var(--bg-alt) !important;
+}
+
+.dark .faq-question {
+  background: var(--card-bg) !important;
+  color: var(--text) !important;
+}
+
+.dark footer {
+  background: var(--bg-alt) !important;
+  color: var(--text-light) !important;
+}
+
+.dark footer a {
+  color: var(--primary) !important;
+}
+
+.dark .stat-value {
+  color: var(--primary) !important;
+}
+
+.dark .platform-note {
+  background: #451a03 !important;
+  color: #fef3c7 !important;
+}
