@@ -172,7 +172,7 @@
 import { ref, computed } from 'vue'
 import { platforms as platformData, faqs as faqData } from './data/platforms.js'
 
-const isDark = ref(false)
+const isDark = ref(true)
 const faqOpen = ref(null)
 
 const toggleTheme = () => {
