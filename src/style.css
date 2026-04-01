@@ -26,6 +26,16 @@
   --shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
+/* 强制全局黑夜模式 */
+.dark, .dark * {
+  background-color: transparent !important;
+  border-color: var(--border) !important;
+}
+
+.dark body {
+  background-color: var(--bg) !important;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.6;
@@ -61,7 +71,7 @@ header {
 }
 
 .dark header {
-  background: var(--bg);
+  background: var(--bg) !important;
 }
 
 .header-content {
@@ -100,13 +110,14 @@ nav a:hover {
 }
 
 .theme-toggle {
-  background: none;
+  background: var(--bg-alt);
   border: 1px solid var(--border);
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
   transition: background 0.2s;
+  color: var(--text);
 }
 
 .theme-toggle:hover {
@@ -118,6 +129,10 @@ nav a:hover {
   text-align: center;
   padding: 80px 20px;
   background: linear-gradient(180deg, var(--bg-alt) 0%, var(--bg) 100%);
+}
+
+.dark .hero {
+  background: linear-gradient(180deg, var(--bg-alt) 0%, var(--bg) 100%) !important;
 }
 
 .hero h1 {
@@ -168,6 +183,7 @@ section h2 {
   font-size: 2rem;
   text-align: center;
   margin-bottom: 16px;
+  color: var(--text);
 }
 
 .section-desc {
@@ -181,8 +197,6 @@ section h2 {
   overflow-x: auto;
   margin: 0 -20px;
   padding: 0 20px;
-  background: var(--card-bg);
-  border-radius: 12px;
 }
 
 .compare-table {
@@ -199,17 +213,14 @@ section h2 {
   padding: 16px;
   text-align: left;
   border-bottom: 1px solid var(--border);
+  background: var(--card-bg) !important;
+  color: var(--text) !important;
 }
 
 .compare-table th {
-  background: var(--bg-alt);
+  background: var(--bg-alt) !important;
   font-weight: 600;
-  color: var(--text);
-}
-
-.dark .compare-table th {
-  background: var(--bg-alt);
-  color: var(--text);
+  color: var(--text) !important;
 }
 
 .compare-table tr:last-child td {
@@ -261,6 +272,7 @@ section h2 {
 .platform-name {
   font-size: 1.5rem;
   font-weight: 700;
+  color: var(--text);
 }
 
 .platform-name small {
@@ -304,6 +316,7 @@ section h2 {
 
 .plan-name {
   font-weight: 600;
+  color: var(--text);
 }
 
 .plan-name small {
@@ -344,6 +357,7 @@ section h2 {
 .dark .platform-note {
   background: #451a03;
   border-left-color: #f59e0b;
+  color: #fef3c7;
 }
 
 .tools {
@@ -436,82 +450,19 @@ footer a {
   }
 }
 
-/* Dark mode comprehensive fixes */
-.dark #app {
-  background: var(--bg);
-}
-
-.dark .hero {
-  background: linear-gradient(180deg, var(--bg-alt) 0%, var(--bg) 100%);
-}
-
-.dark table,
-.dark th,
-.dark td {
-  background: var(--card-bg) !important;
-  color: var(--text) !important;
-  border-color: var(--border) !important;
-}
-
-.dark .plan-card {
+/* 额外的黑夜模式强制覆盖 */
+.dark .compare-table-wrapper {
   background: var(--card-bg);
-  border-color: var(--border);
 }
 
-.dark .theme-toggle {
-  background: var(--bg-alt);
-  border-color: var(--border);
+.dark .faq-list {
+  background: transparent;
 }
 
-.dark .table-wrapper {
-  background: var(--bg);
-}
-
-/* 黑夜模式全面修复 */
-.dark body {
-  background: var(--bg) !important;
-}
-
-.dark .container {
-  background: var(--bg);
-}
-
-.dark .hero {
-  background: linear-gradient(180deg, var(--bg-alt) 0%, var(--bg) 100%) !important;
+.dark .faq-item {
+  background: var(--card-bg);
 }
 
 .dark .platforms {
-  background: var(--bg);
-}
-
-.dark .platform-card {
-  background: var(--card-bg) !important;
-  border-color: var(--border) !important;
-}
-
-.dark .plan {
-  background: var(--bg-alt) !important;
-}
-
-.dark .faq-question {
-  background: var(--card-bg) !important;
-  color: var(--text) !important;
-}
-
-.dark footer {
-  background: var(--bg-alt) !important;
-  color: var(--text-light) !important;
-}
-
-.dark footer a {
-  color: var(--primary) !important;
-}
-
-.dark .stat-value {
-  color: var(--primary) !important;
-}
-
-.dark .platform-note {
-  background: #451a03 !important;
-  color: #fef3c7 !important;
+  background: transparent;
 }
