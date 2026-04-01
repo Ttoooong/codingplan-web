@@ -26,16 +26,6 @@
   --shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
-/* 强制全局黑夜模式 */
-.dark, .dark * {
-  background-color: transparent !important;
-  border-color: var(--border) !important;
-}
-
-.dark body {
-  background-color: var(--bg) !important;
-}
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.6;
@@ -59,19 +49,12 @@ a:hover {
   padding: 0 20px;
 }
 
-/* Header */
 header {
   position: sticky;
   top: 0;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
   z-index: 100;
-  backdrop-filter: blur(8px);
-  background: var(--bg);
-}
-
-.dark header {
-  background: var(--bg) !important;
 }
 
 .header-content {
@@ -101,12 +84,10 @@ nav {
 nav a {
   color: var(--text-light);
   font-size: 0.95rem;
-  transition: color 0.2s;
 }
 
 nav a:hover {
   color: var(--primary);
-  text-decoration: none;
 }
 
 .theme-toggle {
@@ -116,23 +97,13 @@ nav a:hover {
   border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
-  transition: background 0.2s;
   color: var(--text);
 }
 
-.theme-toggle:hover {
-  background: var(--bg-alt);
-}
-
-/* Hero */
 .hero {
   text-align: center;
   padding: 80px 20px;
   background: linear-gradient(180deg, var(--bg-alt) 0%, var(--bg) 100%);
-}
-
-.dark .hero {
-  background: linear-gradient(180deg, var(--bg-alt) 0%, var(--bg) 100%) !important;
 }
 
 .hero h1 {
@@ -174,7 +145,6 @@ nav a:hover {
   font-size: 0.9rem;
 }
 
-/* Section */
 section {
   padding: 60px 0;
 }
@@ -192,7 +162,6 @@ section h2 {
   margin-bottom: 40px;
 }
 
-/* Compare Table */
 .compare-table-wrapper {
   overflow-x: auto;
   margin: 0 -20px;
@@ -213,21 +182,20 @@ section h2 {
   padding: 16px;
   text-align: left;
   border-bottom: 1px solid var(--border);
-  background: var(--card-bg) !important;
-  color: var(--text) !important;
+  background: var(--card-bg);
+  color: var(--text);
 }
 
 .compare-table th {
-  background: var(--bg-alt) !important;
+  background: var(--bg-alt);
   font-weight: 600;
-  color: var(--text) !important;
 }
 
 .compare-table tr:last-child td {
   border-bottom: none;
 }
 
-.compare-table .platform {
+.platform {
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -248,7 +216,6 @@ section h2 {
   color: white;
 }
 
-/* Platform Cards */
 .platforms {
   display: grid;
   gap: 24px;
@@ -356,7 +323,6 @@ section h2 {
 
 .dark .platform-note {
   background: #451a03;
-  border-left-color: #f59e0b;
   color: #fef3c7;
 }
 
@@ -375,7 +341,6 @@ section h2 {
   color: var(--text-light);
 }
 
-/* FAQ */
 .faq-list {
   max-width: 800px;
   margin: 0 auto;
@@ -413,7 +378,6 @@ section h2 {
   line-height: 1.8;
 }
 
-/* Footer */
 footer {
   background: var(--bg-alt);
   padding: 40px 0;
@@ -426,7 +390,6 @@ footer a {
   margin: 0 8px;
 }
 
-/* Mobile */
 @media (max-width: 768px) {
   .hero h1 {
     font-size: 2rem;
@@ -448,21 +411,4 @@ footer a {
   .plan-price {
     text-align: left;
   }
-}
-
-/* 额外的黑夜模式强制覆盖 */
-.dark .compare-table-wrapper {
-  background: var(--card-bg);
-}
-
-.dark .faq-list {
-  background: transparent;
-}
-
-.dark .faq-item {
-  background: var(--card-bg);
-}
-
-.dark .platforms {
-  background: transparent;
 }
